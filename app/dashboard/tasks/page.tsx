@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { collection, getDocs, query, where, addDoc, Timestamp } from 'firebase/firestore';
-import Link from 'next/link';
 import type { User, Task } from '@/types';
 
 export default function Tasks() {
@@ -61,7 +60,7 @@ export default function Tasks() {
 
       alert(`Task completed! You earned ${task.rewardPoints} points!`);
       fetchTasks();
-    } catch (error) {
+    } catch {
       alert('Error completing task');
     }
   };
