@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
+import { doc, getDoc } from 'firebase/firestore';
 import type { User } from '@/types';
 
 export default function Dashboard() {
@@ -11,11 +12,16 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
+        // Get userType from Firestore
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        const userData = userDoc.data();
+
         setUser({
           email: currentUser.email || '',
           uid: currentUser.uid,
+          userType: (userData?.userType as 'earner' | 'creator') || 'earner',
         });
       } else {
         router.push('/login');
