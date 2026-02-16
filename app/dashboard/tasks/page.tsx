@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { collection, getDocs, query, where, addDoc, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query, where, addDoc, Timestamp, doc, getDoc } from 'firebase/firestore';
 import type { User, Task } from '@/types';
 
 export default function Tasks() {
@@ -12,7 +12,7 @@ export default function Tasks() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-   const fetchTasks = async () => {
+  const fetchTasks = async () => {
     try {
       const tasksRef = collection(db, 'tasks');
       const q = query(tasksRef, where('status', '==', 'active'));
@@ -26,15 +26,20 @@ export default function Tasks() {
       console.error('Error fetching tasks:', error);
     }
   };
-  
+
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (!currentUser) {
         router.push('/login');
       } else {
+        // Get userType from Firestore
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        const userData = userDoc.data();
+
         setUser({
           email: currentUser.email || '',
           uid: currentUser.uid,
+          userType: (userData?.userType as 'earner' | 'creator') || 'earner',
         });
         fetchTasks();
       }
@@ -43,8 +48,6 @@ export default function Tasks() {
 
     return () => unsubscribe();
   }, [router]);
-
- 
 
   const handleCompleteTask = async (task: Task) => {
     if (!user) return;
