@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { doc, getDoc } from 'firebase/firestore';
 import type { User } from '@/types';
 
 export default function BuyPoints() {
@@ -13,13 +14,18 @@ export default function BuyPoints() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (!currentUser) {
         router.push('/login');
       } else {
+        // Get userType from Firestore
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        const userData = userDoc.data();
+
         setUser({
           email: currentUser.email || '',
           uid: currentUser.uid,
+          userType: (userData?.userType as 'earner' | 'creator') || 'earner',
         });
       }
     });
@@ -95,11 +101,11 @@ export default function BuyPoints() {
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-4 md:p-8">
+      <div className="bg-white rounded-lg shadow-lg p-8">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Buy Points</h2>
 
         <div className="mb-8 bg-blue-50 p-4 md:p-6 rounded-lg border-2 border-blue-400">
-          <p className="text-gray-800 text-base md:text-lg">
+          <p className="text-gray-800 text-lg">
             <strong>Exchange Rate:</strong> ₦1 = 1 Point
           </p>
         </div>
