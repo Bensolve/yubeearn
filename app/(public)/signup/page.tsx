@@ -1,25 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { useRouter } from 'next/navigation';
+import { auth, db } from '@/lib/firebase';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function Signup() {
+  const searchParams = useSearchParams();
+  const userTypeParam = searchParams.get('type') as 'earner' | 'creator' | null;
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [userType, setUserType] = useState<'earner' | 'creator' | ''>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
+  useEffect(() => {
+    // Pre-fill role from query param
+    if (userTypeParam) {
+      setUserType(userTypeParam);
+    }
+  }, [userTypeParam]);
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!userType) {
+      setError('Please select if you are an Earner or Creator');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
+
+      await setDoc(doc(db, 'users', uid), {
+        email,
+        userType,
+        balance: 0,
+        tasksCompleted: 0,
+        createdAt: new Date(),
+      });
+
       router.push('/dashboard');
     } catch (err) {
       const error = err as Error;
@@ -34,10 +62,46 @@ export default function Signup() {
       <div className="bg-white border-2 border-gray-200 rounded-lg shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-red-600 mb-2">YubeEarn</h1>
-          <p className="text-gray-800 text-lg font-semibold">Sign Up</p>
+          <p className="text-gray-800 text-lg font-semibold">Create Account</p>
+          {userType && (
+            <p className="text-gray-600 text-sm mt-2">
+              {userType === 'earner' ? '💰 Earner Mode' : '🎬 Creator Mode'}
+            </p>
+          )}
         </div>
-        
+
         <form onSubmit={handleSignup} className="space-y-4">
+          {/* Only show role selection if NOT pre-filled from URL */}
+          {!userTypeParam && (
+            <div>
+              <label className="block text-gray-900 font-semibold mb-3">I am a...</label>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setUserType('earner')}
+                  className={`w-full p-4 rounded-lg border-2 font-bold transition text-left ${
+                    userType === 'earner'
+                      ? 'border-red-600 bg-red-50 text-red-600'
+                      : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                  }`}
+                >
+                  💰 Earner - Watch videos & earn money
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUserType('creator')}
+                  className={`w-full p-4 rounded-lg border-2 font-bold transition text-left ${
+                    userType === 'creator'
+                      ? 'border-red-600 bg-red-50 text-red-600'
+                      : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                  }`}
+                >
+                  🎬 Creator - Create tasks & pay users
+                </button>
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-gray-900 font-semibold mb-2">Email</label>
             <input
@@ -49,7 +113,7 @@ export default function Signup() {
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-gray-900 font-semibold mb-2">Password</label>
             <input
@@ -74,13 +138,13 @@ export default function Signup() {
             disabled={loading}
             className="w-full bg-red-600 text-white py-2 rounded font-bold hover:bg-red-700 disabled:bg-gray-400 text-lg"
           >
-            {loading ? 'Loading...' : 'Sign Up'}
+            {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-gray-800">Already have account?</p>
-          <Link href="/login" className="text-red-600 font-bold hover:underline">
+          <Link href="/(public)/login" className="text-red-600 font-bold hover:underline">
             Login
           </Link>
         </div>

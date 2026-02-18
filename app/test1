@@ -1,0 +1,77 @@
+pnpm run dev
+```
+
+Visit: `http://localhost:3000`
+
+### Step 1: Earner Signup Flow
+
+1. **Homepage loads** ✅
+   - See "🎬 Reach 4,000 Watch Hours Faster"
+   - See "🚀 Get Started Now" button
+
+2. **Click "🚀 Get Started Now"** ✅
+   - Should go to: `http://localhost:3000/choose-role`
+   - See two options: "💰 I Want to Earn" and "🎬 I'm a Creator"
+
+3. **Click "💰 I Want to Earn"** 
+   - Should go to: `http://localhost:3000/signup?type=earner`
+   - See signup form
+   - Role should be pre-selected as "Earner"
+
+4. **Fill Earner Signup Form:**
+   - Email: `earner1@test.com`
+   - Password: `Test@12345`
+   - Role: Should show "💰 Earner Mode" (pre-filled)
+   - Click **"Create Account"**
+
+5. **Expected Result:**
+   - Form submits without errors
+   - Redirects to earner dashboard
+   - URL becomes: `http://localhost:3000/dashboard` (NOT /(earner)/dashboard)
+   - Page shows: "💰 Earner" in navbar
+   - Sidebar shows earner links:
+     - 📊 Dashboard
+     - 📋 Available Tasks
+     - ✅ My Tasks
+     - 💰 Earnings
+     - 💳 Withdraw
+
+---
+
+## Things to Check in Firebase
+
+After earner signup, check Firebase Console:
+
+1. Go to https://console.firebase.google.com
+2. Select your project
+3. Click **"Firestore Database"**
+4. Look for **"users"** collection
+5. Should see new document:
+```
+   {
+     email: "earner1@test.com",
+     userType: "earner",
+     balance: 0,
+     tasksCompleted: 0,
+     createdAt: (timestamp)
+   }
+```
+
+---
+
+## Test Checklist for Earner
+```
+□ Homepage loads
+□ "Get Started" button works
+□ Role selection page shows both options
+□ Click earner option (💰 I Want to Earn)
+□ Signup form shows "Earner Mode"
+□ Form submits successfully
+□ Redirects to earner dashboard
+□ URL shows: /dashboard
+□ Navbar shows: "💰 Earner"
+□ Sidebar shows earner-specific links
+□ Can click sidebar links without errors
+□ Can logout
+□ User document appears in Firebase with userType: "earner"
+□ Firebase shows both creator1@test.com and earner1@test.com

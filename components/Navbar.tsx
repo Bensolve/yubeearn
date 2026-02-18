@@ -5,9 +5,9 @@ import Link from 'next/link';
 import type { NavbarProps } from '@/types';
 
 export default function Navbar({
-  logo = '🇬🇭 YubeEarn Ghana',
+  logo = 'YubeEarn GH',
   loginHref = '/login',
-  signupHref = '/signup',
+ signupHref="/choose-role"  // Changed from "/signup"
 }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -16,20 +16,20 @@ export default function Navbar({
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
         <Link href="/">
-          <h1 className="text-2xl md:text-3xl font-bold cursor-pointer hover:opacity-90 transition">
+          <h1 className="text-2xl md:text-3xl font-black cursor-pointer hover:opacity-90 transition">
             {logo}
           </h1>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex gap-4">
+        <div className="hidden md:flex gap-3">
           <Link href={loginHref}>
-            <button className="bg-white text-red-600 px-4 py-2 rounded font-bold hover:bg-gray-100 transition">
+            <button className="bg-white text-red-600 px-4 py-2 rounded font-bold hover:bg-gray-100 transition text-sm md:text-base">
               Login
             </button>
           </Link>
           <Link href={signupHref}>
-            <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded font-bold hover:bg-white hover:text-red-600 transition">
+            <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded font-bold hover:bg-white hover:text-red-600 transition text-sm md:text-base">
               Join Now
             </button>
           </Link>
@@ -38,7 +38,7 @@ export default function Navbar({
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-2xl font-bold"
+          className="md:hidden text-2xl font-bold hover:opacity-80 transition"
         >
           {isOpen ? '✕' : '☰'}
         </button>
@@ -48,12 +48,12 @@ export default function Navbar({
       {isOpen && (
         <div className="md:hidden mt-4 space-y-3 border-t border-red-500 pt-4">
           <Link href={loginHref} onClick={() => setIsOpen(false)}>
-            <button className="w-full bg-white text-red-600 px-4 py-2 rounded font-bold hover:bg-gray-100 transition">
+            <button className="w-full bg-white text-red-600 px-4 py-2 rounded font-bold hover:bg-gray-100 transition text-sm">
               Login
             </button>
           </Link>
           <Link href={signupHref} onClick={() => setIsOpen(false)}>
-            <button className="w-full bg-transparent border-2 border-white text-white px-4 py-2 rounded font-bold hover:bg-white hover:text-red-600 transition">
+            <button className="w-full bg-transparent border-2 border-white text-white px-4 py-2 rounded font-bold hover:bg-white hover:text-red-600 transition text-sm">
               Join Now
             </button>
           </Link>

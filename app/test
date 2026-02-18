@@ -1,0 +1,100 @@
+pnpm run dev
+```
+
+Visit: `http://localhost:3000`
+
+### Step 2: Creator Signup Flow
+
+1. **Homepage loads** ✅
+   - See "🎬 Reach 4,000 Watch Hours Faster"
+   - See "🚀 Get Started Now" button
+
+2. **Click "🚀 Get Started Now"** ✅
+   - Should go to: `http://localhost:3000/choose-role`
+   - See two options: "💰 I Want to Earn" and "🎬 I'm a Creator"
+
+3. **Click "🎬 I'm a Creator"** ✅
+   - Should go to: `http://localhost:3000/signup?type=creator`
+   - See signup form
+   - Role should be pre-selected as "Creator"
+
+4. **Fill Creator Signup Form:**
+   - Email: `creator1@test.com`
+   - Password: `Test@12345`
+   - Role: Should show "🎬 Creator Mode" (pre-filled)
+   - Click **"Create Account"** ✅
+
+5. **Expected Result:** ✅
+   - Form submits without errors
+   - Redirects to creator dashboard
+   - URL becomes: `http://localhost:3000/(creator)/dashboard`
+   - Page shows: "🎬 Creator" in navbar
+   - Sidebar shows creator links:
+     - 📊 Dashboard
+     - 🎬 My Campaigns
+     - ➕ Create Campaign
+     - ✓ Pending Approvals
+     - 💳 Fund Account
+
+---
+
+## Things to Check in Firebase
+
+After signup, check Firebase Console:
+
+1. Go to https://console.firebase.google.com
+2. Select your project
+3. Click **"Firestore Database"**
+4. Look for **"users"** collection
+5. Should see new document:
+```
+   {
+     email: "creator1@test.com",
+     userType: "creator",
+     balance: 0,
+     tasksCompleted: 0,
+     createdAt: (timestamp)
+   }
+```
+
+---
+
+## Troubleshooting - What Could Go Wrong
+
+### Error 1: "Redirect loop"
+- **Cause:** Role check failing
+- **Fix:** Clear browser cache (Ctrl+Shift+Delete)
+
+### Error 2: "Page not found"
+- **Cause:** File structure issue
+- **Fix:** Check all files moved correctly
+
+### Error 3: "User not found"
+- **Cause:** Firebase not saving user
+- **Fix:** Check Firebase has Firestore DB created
+
+### Error 4: "Unexpected any" error
+- **Cause:** TypeScript errors in component
+- **Fix:** Replace `any` with proper types
+
+### Error 5: Sidebar doesn't show creator links
+- **Cause:** `SidebarCreator` component issue
+- **Fix:** Check component is imported correctly
+
+---
+
+## Test Checklist
+```
+□ Homepage loads
+□ "Get Started" button works
+□ Role selection page shows both options
+□ Click creator option
+□ Signup form shows "Creator Mode"
+□ Form submits successfully
+□ Redirects to creator dashboard
+□ URL shows: /(creator)/dashboard
+□ Navbar shows: "🎬 Creator"
+□ Sidebar shows creator-specific links
+□ Can click sidebar links without errors
+□ Can logout
+□ User document appears in Firebase

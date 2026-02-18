@@ -5,11 +5,10 @@ import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import SidebarCreator from '@/components/SidebarCreator';
 import SidebarEarner from '@/components/SidebarEarner';
 import type { User } from '@/types';
 
-export default function DashboardLayout({
+export default function EarnerLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -21,19 +20,26 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
-      if (currentUser) {
-        // Get userType from Firestore
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        const userData = userDoc.data();
-
-        setUser({
-          email: currentUser.email || '',
-          uid: currentUser.uid,
-          userType: (userData?.userType as 'earner' | 'creator') || 'earner',
-        });
-      } else {
-        router.push('/login');
+      if (!currentUser) {
+        router.push('/(public)/login');
+        setLoading(false);
+        return;
       }
+
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      const userData = userDoc.data();
+
+      if (userData?.userType !== 'earner') {
+        router.push('/dashboard');
+        setLoading(false);
+        return;
+      }
+
+      setUser({
+        email: currentUser.email || '',
+        uid: currentUser.uid,
+        userType: 'earner',
+      });
       setLoading(false);
     });
 
@@ -42,28 +48,23 @@ export default function DashboardLayout({
 
   const handleLogout = async () => {
     await signOut(auth);
-    router.push('/login');
+    router.push('/(public)/login');
   };
 
   if (loading) return <div className="text-center mt-20 text-2xl">Loading...</div>;
 
   if (!user) return null;
 
-  // Choose sidebar based on user role
-  const Sidebar = user.userType === 'creator' ? SidebarCreator : SidebarEarner;
-
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
       <div
         className={`fixed md:relative z-50 h-screen transform transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        <Sidebar />
+        <SidebarEarner />
       </div>
 
-      {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-40"
@@ -71,9 +72,7 @@ export default function DashboardLayout({
         />
       )}
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col w-full md:w-auto">
-        {/* Top Navbar */}
         <nav className="bg-white text-gray-900 p-3 md:p-4 shadow-lg flex justify-between items-center sticky top-0 z-30">
           <div className="flex items-center gap-3 md:gap-4">
             <button
@@ -82,9 +81,7 @@ export default function DashboardLayout({
             >
               ☰
             </button>
-            <h2 className="text-lg md:text-2xl font-bold">
-              {user.userType === 'creator' ? '🎬 Creator' : '💰 Earner'}
-            </h2>
+            <h2 className="text-lg md:text-2xl font-bold">💰 Earner</h2>
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
@@ -100,7 +97,6 @@ export default function DashboardLayout({
           </div>
         </nav>
 
-        {/* Main Content Area */}
         <div className="flex-1 overflow-auto">{children}</div>
       </div>
     </div>
