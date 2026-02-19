@@ -1,3 +1,4 @@
+// app/dashboard/@earner/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,6 +24,11 @@ export default function EarnerDashboard() {
           uid: currentUser.uid,
           userType: (userData?.userType as 'earner' | 'creator') || 'earner',
         });
+
+        // Verify user is earner
+        if (userData?.userType !== 'earner') {
+          router.push('/dashboard');  // Redirect if not earner
+        }
       } else {
         router.push('/(public)/login');
       }
@@ -70,7 +76,7 @@ export default function EarnerDashboard() {
           <p className="text-gray-700 mb-6">
             Explore available tasks, earn money by watching videos and completing simple assignments.
           </p>
-          <Link href="/(earner)/dashboard/tasks">
+          <Link href="/(earner)/tasks">
             <button className="bg-blue-600 text-white px-6 py-3 rounded font-bold hover:bg-blue-700 transition">
               📋 View Available Tasks
             </button>
@@ -84,7 +90,7 @@ export default function EarnerDashboard() {
           <p className="text-gray-700 mb-6">
             Track your in-progress tasks, completed tasks, and pending payouts.
           </p>
-          <Link href="/(earner)/dashboard/my-tasks">
+          <Link href="/(earner)/my-tasks">
             <button className="bg-green-600 text-white px-6 py-3 rounded font-bold hover:bg-green-700 transition">
               ✓ View My Tasks
             </button>
@@ -98,7 +104,7 @@ export default function EarnerDashboard() {
           <p className="text-gray-700 mb-6">
             View your total earnings, bonuses, and track your income over time.
           </p>
-          <Link href="/(earner)/dashboard/earnings">
+          <Link href="/(earner)/earnings">
             <button className="bg-purple-600 text-white px-6 py-3 rounded font-bold hover:bg-purple-700 transition">
               💳 View Earnings
             </button>
@@ -112,7 +118,7 @@ export default function EarnerDashboard() {
           <p className="text-gray-700 mb-6">
             Withdraw your earnings to your bank account or mobile money.
           </p>
-          <Link href="/(earner)/dashboard/withdraw">
+          <Link href="/(earner)/withdraw">
             <button className="bg-orange-600 text-white px-6 py-3 rounded font-bold hover:bg-orange-700 transition">
               🚀 Withdraw Now
             </button>

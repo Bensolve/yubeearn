@@ -1,3 +1,5 @@
+// app/dashboard/layout.tsx
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -7,12 +9,18 @@ import { signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import SidebarCreator from '@/components/SidebarCreator';
 import SidebarEarner from '@/components/SidebarEarner';
+import AdminSidebar from '@/components/AdminSidebar';
 import type { User } from '@/types';
 
 export default function DashboardLayout({
-  children,
+  creator,
+  earner,
+  admin,
 }: {
   children: React.ReactNode;
+  creator: React.ReactNode;
+  earner: React.ReactNode;
+  admin: React.ReactNode;
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,15 +30,24 @@ export default function DashboardLayout({
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
-        // Get userType from Firestore
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        const userData = userDoc.data();
+        try {
+          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          const userData = userDoc.data();
 
-        setUser({
-          email: currentUser.email || '',
-          uid: currentUser.uid,
-          userType: (userData?.userType as 'earner' | 'creator') || 'earner',
-        });
+          if (userData) {
+            setUser({
+              email: currentUser.email || '',
+              uid: currentUser.uid,
+              userType: (userData?.userType as 'earner' | 'creator' | 'admin') || 'earner',
+            });
+          } else {
+            // User not in Firestore, redirect to login
+            router.push('/login');
+          }
+        } catch (error) {
+          console.error('Error fetching user:', error);
+          router.push('/login');
+        }
       } else {
         router.push('/login');
       }
@@ -38,19 +55,63 @@ export default function DashboardLayout({
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router]); // ← Keep this dependency
 
   const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/login');
+    try {
+      await signOut(auth);
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
-  if (loading) return <div className="text-center mt-20 text-2xl">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Choose sidebar based on user role
-  const Sidebar = user.userType === 'creator' ? SidebarCreator : SidebarEarner;
+  const renderSidebar = () => {
+    switch (user.userType) {
+      case 'creator':
+        return <SidebarCreator />;
+      case 'earner':
+        return <SidebarEarner />;
+      case 'admin':
+        return <AdminSidebar />;
+      default:
+        return <SidebarEarner />;
+    }
+  };
+
+  const renderContent = () => {
+    switch (user.userType) {
+      case 'creator':
+        return creator;
+      case 'earner':
+        return earner;
+      case 'admin':
+        return admin;
+      default:
+        return earner;
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -60,7 +121,7 @@ export default function DashboardLayout({
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        <Sidebar />
+        {renderSidebar()}
       </div>
 
       {/* Overlay for mobile */}
@@ -83,7 +144,9 @@ export default function DashboardLayout({
               ☰
             </button>
             <h2 className="text-lg md:text-2xl font-bold">
-              {user.userType === 'creator' ? '🎬 Creator' : '💰 Earner'}
+              {user.userType === 'creator' && '🎬 Creator'}
+              {user.userType === 'earner' && '💰 Earner'}
+              {user.userType === 'admin' && '🔐 Admin'}
             </h2>
           </div>
 
@@ -101,7 +164,9 @@ export default function DashboardLayout({
         </nav>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-auto">{children}</div>
+        <div className="flex-1 overflow-auto">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

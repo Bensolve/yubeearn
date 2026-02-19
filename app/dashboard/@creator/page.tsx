@@ -1,3 +1,4 @@
+// app/dashboard/@creator/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,6 +24,11 @@ export default function CreatorDashboard() {
           uid: currentUser.uid,
           userType: (userData?.userType as 'earner' | 'creator') || 'earner',
         });
+
+        // Verify user is creator
+        if (userData?.userType !== 'creator') {
+          router.push('/dashboard');  // Redirect if not creator
+        }
       } else {
         router.push('/(public)/login');
       }

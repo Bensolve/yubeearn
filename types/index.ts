@@ -1,9 +1,8 @@
-export interface User {
-  uid: string;
+export type User = {
   email: string;
-  userType: 'earner' | 'creator';
-}
-
+  uid: string;
+  userType: 'earner' | 'creator' | 'admin';  // ✅ Added 'admin'
+};
 export interface Task {
   id: string;
   title: string;
