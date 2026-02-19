@@ -1,5 +1,4 @@
-'use client';
-
+'use client'
 import { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
@@ -8,22 +7,24 @@ import Link from 'next/link';
 import { doc, setDoc } from 'firebase/firestore';
 
 export default function Signup() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const userTypeParam = searchParams.get('type') as 'earner' | 'creator' | null;
-
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState<'earner' | 'creator' | ''>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
+  // Only read searchParams after component mounts (client-side only)
   useEffect(() => {
-    // Pre-fill role from query param
+    setMounted(true);
+    const userTypeParam = searchParams.get('type') as 'earner' | 'creator' | null;
     if (userTypeParam) {
       setUserType(userTypeParam);
     }
-  }, [userTypeParam]);
+  }, [searchParams]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +57,13 @@ export default function Signup() {
       setLoading(false);
     }
   };
+
+  // Don't render until mounted (prevents hydration mismatch)
+  if (!mounted) {
+    return null;
+  }
+
+  const userTypeParam = searchParams.get('type');
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
