@@ -1,6 +1,8 @@
+
 import type { Metadata } from 'next';
-import { AppProvider } from '@/app/context/AppContext';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import './globals.css';
+import '@/lib/firebase'; // ← add this line
 
 export const metadata: Metadata = {
   title: 'YubeEarn',
@@ -15,9 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AppProvider>
-          {children}
-        </AppProvider>
+        
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        
       </body>
     </html>
   );

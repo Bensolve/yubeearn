@@ -1,44 +1,34 @@
 // ============================================
-// CORE TYPES
+// USER & AUTH
 // ============================================
 
 export type UserRole = 'creator' | 'earner' | 'admin';
 
-
-
 export interface User {
   id: string;
   email: string;
-  password?: string;
   role: UserRole;
   balance: number;
-  totalEarned?: number;
-  completedTasks?: string[];
-  earningsHistory?: Earning[];
+  totalEarned: number;
+  completedTasks: string[];
+  earningsHistory: Earning[];
   createdAt: Date;
-  // ← add these
-  paymentMethod?: 'bank' | 'momo';
-  bankName?: string;
-  accountNumber?: string;
-  phoneNumber?: string;
+  
 }
+
+// ============================================
+// TASKS & EARNINGS
+// ============================================
 
 export interface Task {
   id: string;
-  campaignId: string;
   title: string;
-  description?: string;
-  videoUrl: string;
-  reward: number;
+  description: string;
   duration: number;
   completions: number;
-  status: 'active' | 'expired' | 'cancelled';
-  createdAt: Date;
+  reward: number;
+  youtubeUrl: string;
 }
-
-// ============================================
-// CONTEXT & STATE TYPES
-// ============================================
 
 export interface Earning {
   id: string;
@@ -48,40 +38,46 @@ export interface Earning {
   status: 'completed' | 'pending';
 }
 
+// ============================================
+// WITHDRAWALS
+// ============================================
+
+export interface Withdrawal {
+  id: string;
+  userId: string;
+  amount: number;
+  method: 'bank' | 'momo';
+  
+  // Bank details (only for bank transfers)
+  bankName?: string;
+  accountNumber?: string;
+  bankCode?: string;
+  
+  // Mobile money details (only for momo)
+  phoneNumber?: string;
+  
+  // Paystack details
+  paystackReference: string;
+  transferCode?: string;
+  
+  // Fees & amounts
+  fee: number;
+  netAmount: number;
+  
+  // Status
+  status: 'pending' | 'completed' | 'failed';
+  errorMessage?: string;
+  
+  // Timestamps
+  createdAt: string;
+  processedAt?: string;
+}
+// ============================================
+// UI/NOTIFICATIONS
+// ============================================
+
 export interface Notification {
   message: string;
   type: 'success' | 'error' | 'info';
   id: string;
-}
-
-export interface AppContextType {
-  // User
-  currentUser: User | null;
-  setCurrentUser: (user: User | null) => void;
-
-  // Balance & Earnings
-  balance: number;
-  setBalance: (balance: number) => void;
-  totalEarned: number;
-  setTotalEarned: (amount: number) => void;
-
-  // Tasks
-  allTasks: Task[];
-  setAllTasks: (tasks: Task[]) => void;
-  completedTasks: string[];
-  setCompletedTasks: (taskIds: string[]) => void;
-
-  // Earnings History
-  earningsHistory: Earning[];
-  setEarningsHistory: (earnings: Earning[]) => void;
-
-  // Notifications
-  notification: Notification | null;
-  showNotification: (message: string, type: 'success' | 'error' | 'info') => void;
-  hideNotification: () => void;
-
-  // Actions
-  completeTask: (taskId: string, amount: number) => void;
-  withdraw: (amount: number) => void;
-  logout: () => void;
 }

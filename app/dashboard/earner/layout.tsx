@@ -1,19 +1,32 @@
-import EarnerSidebar from '@/components/earner-sidebar';
+import {  getLoggedInUserAction } from '@/lib/auth';
+import { fetchUserData } from '@/lib/actions/user';
+import AppSidebar from '@/components/app-sidebar';
+import { EARNER_MENU_ITEMS } from '@/constants/navigation';
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
-export default function EarnerLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function EarnerLayout({ children }: { children: React.ReactNode }) {
+  const currentUser = await getLoggedInUserAction();
+
+  if (!currentUser) {
+    return <div className="p-8">Not logged in</div>;
+  }
+
+  // Fetch full user data from Firestore
+  const userData = await fetchUserData(currentUser.id);
+
+  if (!userData) {
+    return <div className="p-8">User data not found</div>;
+  }
+
   return (
-    <div className="flex">
-      {/* Sidebar */}
-      <EarnerSidebar />
-
-      {/* Main Content */}
-      <div className="flex-1 ml-64">
-        {children}
-      </div>
-    </div>
+    <SidebarProvider>
+      <AppSidebar menuItems={EARNER_MENU_ITEMS} user={userData} />
+      <SidebarInset>
+        <main className="flex-1">
+          {/* Pass userData to children via context or props */}
+          {children}
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

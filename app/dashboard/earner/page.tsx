@@ -1,12 +1,18 @@
-"use client";
-
+import {  getLoggedInUserAction } from '@/lib/auth';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useAppContext } from "@/app/context/AppContext";
 import { formatAmount } from "@/lib/utils";
 
-export default function EarnerDashboard() {
-  const { balance, totalEarned, completedTasks } = useAppContext();
+export default async function EarnerDashboard() {
+  const currentUser = await getLoggedInUserAction();
+
+  if (!currentUser) {
+    return <div className="p-8">Not logged in  a guest user</div>;
+  }
+
+  const balance = currentUser.balance || 0;
+  const totalEarned = currentUser.totalEarned || 0;
+  const completedTasks = currentUser.completedTasks || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
