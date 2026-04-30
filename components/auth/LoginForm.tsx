@@ -3,9 +3,10 @@
 import { loginAction } from '@/lib/auth';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-
 
 export default function LoginForm() {
   const router = useRouter();
@@ -19,7 +20,6 @@ export default function LoginForm() {
     setLoading(true);
     setError('');
 
-    // Call Server Action (secure, server-side)
     const result = await loginAction(email, password);
 
     if (result.success) {
@@ -35,63 +35,83 @@ export default function LoginForm() {
     setLoading(false);
   };
 
-
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-background px-6 py-12">
+      <Card className="w-full max-w-md bg-card border-border p-8 md:p-10">
+        {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-red-600 mb-2">YubeEarn</h1>
-          <p className="text-gray-600">Login to your account</p>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">Y</span>
+            </div>
+            <h1 className="text-3xl font-bold text-primary">YubeEarn</h1>
+          </div>
+          <p className="text-muted-foreground">Welcome back! Login to continue</p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Email</label>
-            <input
+        {/* Form */}
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          {/* Email Field */}
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-foreground">Email Address</label>
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="h-10 border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-primary"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
-            <input
+          {/* Password Field */}
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-foreground">Password</label>
+            <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="h-10 border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-primary"
             />
           </div>
 
+          {/* Error Message */}
           {error && (
-            <div className="bg-red-100 border-l-4 border-red-600 text-red-800 p-3 rounded">
-              <p className="font-bold">Error:</p>
+            <div className="bg-red-100 border-l-4 border-red-600 text-red-800 p-4 rounded">
+              <p className="font-bold text-sm">Error</p>
               <p className="text-sm">{error}</p>
             </div>
           )}
 
-          <Button type="submit" className="w-full text-lg py-6" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            className="w-full h-11 text-base bg-primary hover:bg-primary/90 text-white font-bold"
+            disabled={loading}
+          >
+            {loading ? 'Logging in...' : 'Login'}
           </Button>
         </form>
 
-        <div className="mt-6 text-center space-y-2">
-          <p className="text-gray-600">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup?role=earner" className="text-red-600 font-bold hover:underline">
+        {/* Footer Links */}
+        <div className="mt-8 space-y-3 text-center">
+          <p className="text-sm text-muted-foreground">
+            Don&apos;t have an account?{' '}
+            <Link 
+              href="/signup?role=earner" 
+              className="text-primary font-bold hover:underline"
+            >
               Sign Up
             </Link>
           </p>
-          <Link href="#" className="text-sm text-gray-600 hover:underline block">
+          <Link 
+            href="#" 
+            className="block text-sm text-muted-foreground hover:text-primary transition"
+          >
             Forgot password?
           </Link>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

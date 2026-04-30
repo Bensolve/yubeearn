@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { logoutAction } from "@/lib/auth";
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { logoutAction } from '@/lib/auth';
 import {
   Sidebar,
   SidebarContent,
@@ -11,10 +11,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import type { User } from "@/types";
+} from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import type { User } from '@/types';
 
 interface MenuItem {
   label: string;
@@ -33,7 +34,7 @@ export default function AppSidebar({ menuItems, user }: AppSidebarProps) {
 
   const handleLogout = async () => {
     try {
-      await logoutAction;
+      await logoutAction();
       router.push('/login');
     } catch (error) {
       console.error('[Sidebar] Logout failed:', error);
@@ -41,15 +42,22 @@ export default function AppSidebar({ menuItems, user }: AppSidebarProps) {
   };
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-6">
-        <Link href="/" className="text-2xl font-bold text-red-600">
-          YubeEarn
+    <Sidebar className="bg-background border-r border-border">
+      {/* Header */}
+      <SidebarHeader className="p-6 border-b border-border">
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center group-hover:bg-primary/90 transition">
+            <span className="text-white font-bold text-sm">Y</span>
+          </div>
+          <span className="text-xl font-bold text-primary group-hover:text-primary/90 transition">
+            YubeEarn
+          </span>
         </Link>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarMenu>
+      {/* Navigation Menu */}
+      <SidebarContent className="p-4">
+        <SidebarMenu className="space-y-2">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -57,15 +65,15 @@ export default function AppSidebar({ menuItems, user }: AppSidebarProps) {
                 <SidebarMenuButton
                   asChild
                   isActive={isActive}
-                  className={`font-bold ${
+                  className={`rounded-lg font-bold transition ${
                     isActive
-                      ? "bg-red-600 text-white hover:bg-red-700"
-                      : "text-gray-300 hover:bg-gray-800"
+                      ? 'bg-primary text-white hover:bg-primary/90'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                 >
                   <Link href={item.href}>
-                    <span className="text-xl">{item.icon}</span>
-                    <span>{item.label}</span>
+                    <span className="text-lg">{item.icon}</span>
+                    <span className="text-sm">{item.label}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -74,16 +82,22 @@ export default function AppSidebar({ menuItems, user }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        <Separator className="mb-4 bg-gray-700" />
-        <div className="bg-gray-800 rounded-lg p-4 mb-4">
-          <p className="text-xs text-gray-400 mb-1">Logged in as</p>
-          <p className="text-sm font-bold text-white truncate">
-            {user?.email || "Not logged in"}
+      {/* Footer */}
+      <SidebarFooter className="p-4 space-y-4 border-t border-border">
+        {/* User Card */}
+        <Card className="bg-muted border-border p-4">
+          <p className="text-xs text-muted-foreground mb-2 font-bold">Logged in as</p>
+          <p className="text-sm font-bold text-foreground truncate">
+            {user?.email || 'Not logged in'}
           </p>
-        </div>
+          <p className="text-xs text-muted-foreground mt-2 capitalize">
+            Role: <Badge variant="outline" className="ml-1">{user?.role}</Badge>
+          </p>
+        </Card>
+
+        {/* Logout Button */}
         <Button
-          className="w-full bg-red-600 hover:bg-red-700 text-white"
+          className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-10"
           onClick={handleLogout}
         >
           Logout

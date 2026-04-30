@@ -7,6 +7,9 @@ import '@/lib/firebase'; // ← add this line
 export const metadata: Metadata = {
   title: 'YubeEarn',
   description: 'Earn money watching videos',
+    icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

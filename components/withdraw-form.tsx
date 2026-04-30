@@ -3,11 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { formatAmount } from '@/lib/utils';
 import { initiateWithdrawalAction } from '@/lib/actions/withdraw';
 import { getGhanaBanksAction, verifyAccountNumberAction } from '@/lib/actions/paystack';
 import type { User } from '@/types';
+import { AlertCircle, CheckCircle2, Zap, Smartphone } from 'lucide-react';
 
 interface Bank {
   id: number;
@@ -170,25 +173,35 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
 
   return (
     <>
+      {/* Message Alert */}
       {message && (
-        <div
-          className={`mb-6 p-4 rounded-lg border-l-4 ${
+        <Card
+          className={`mb-6 p-4 border-l-4 ${
             message.type === 'success'
-              ? 'bg-green-100 border-green-600 text-green-800'
+              ? 'bg-success/10 border-success text-success'
               : 'bg-red-100 border-red-600 text-red-800'
           }`}
         >
-          <p className="font-bold">{message.text}</p>
-        </div>
+          <div className="flex items-start gap-3">
+            {message.type === 'success' ? (
+              <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            )}
+            <p className="font-bold text-sm">{message.text}</p>
+          </div>
+        </Card>
       )}
 
-      <div className="bg-white rounded-lg shadow p-8 max-w-2xl">
+      {/* Withdraw Form Card */}
+      <Card className="bg-card border-border p-8 max-w-2xl">
         <form className="space-y-6" onSubmit={handleWithdraw}>
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">
+          {/* Amount Input */}
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-foreground">
               Amount to Withdraw (GHS)
             </label>
-            <input
+            <Input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -196,39 +209,46 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
               min="10"
               max="50000"
               step="0.01"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="h-10 border-border bg-background focus:ring-primary"
             />
-            <p className="text-xs text-gray-500 mt-2">Min: GHS 10 | Max: GHS 50,000</p>
+            <p className="text-xs text-muted-foreground">Min: GHS 10 | Max: GHS 50,000</p>
             
+            {/* Amount Preview */}
             {amount && (
-              <div className="mt-3 bg-gray-50 p-3 rounded">
-                <p className="text-sm text-gray-600">
-                  You requested: <span className="font-bold">GHS {formatAmount(parseFloat(amount))}</span>
-                </p>
-                {fee > 0 && (
-                  <>
-                    <p className="text-sm text-gray-600">
-                      Processing fee: <span className="font-bold text-red-600">GHS {fee}</span>
-                    </p>
-                    <p className="text-sm text-gray-900 font-bold">
-                      You&apos;ll receive: <span className="text-green-600">GHS {formatAmount(netAmount)}</span>
-                    </p>
-                  </>
-                )}
-              </div>
+              <Card className="bg-muted border-border p-4 mt-3">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-muted-foreground">You requested:</p>
+                    <p className="font-bold text-foreground">GHS {formatAmount(parseFloat(amount))}</p>
+                  </div>
+                  {fee > 0 && (
+                    <>
+                      <div className="flex justify-between items-center pt-2 border-t border-border">
+                        <p className="text-sm text-muted-foreground">Processing fee:</p>
+                        <p className="font-bold text-orange-600">-GHS {fee}</p>
+                      </div>
+                      <div className="flex justify-between items-center pt-2 border-t border-border">
+                        <p className="text-sm font-bold text-foreground">You&apos;ll receive:</p>
+                        <p className="font-bold text-success">GHS {formatAmount(netAmount)}</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </Card>
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-3">Withdrawal Method</label>
-            <div className="flex gap-4">
+          {/* Method Selection */}
+          <div className="space-y-3">
+            <label className="block text-sm font-bold text-foreground">Withdrawal Method</label>
+            <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={() => setMethod('bank')}
-                className={`flex-1 p-4 rounded-lg border-2 font-bold transition ${
+                className={`p-4 rounded-lg border-2 font-bold transition ${
                   method === 'bank'
-                    ? 'border-red-600 bg-red-50 text-red-600'
-                    : 'border-gray-300 text-gray-700'
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border text-muted-foreground hover:border-primary/50'
                 }`}
               >
                 🏦 Bank Account
@@ -236,10 +256,10 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
               <button
                 type="button"
                 onClick={() => setMethod('momo')}
-                className={`flex-1 p-4 rounded-lg border-2 font-bold transition ${
+                className={`p-4 rounded-lg border-2 font-bold transition ${
                   method === 'momo'
-                    ? 'border-red-600 bg-red-50 text-red-600'
-                    : 'border-gray-300 text-gray-700'
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border text-muted-foreground hover:border-primary/50'
                 }`}
               >
                 📱 Mobile Money
@@ -247,16 +267,20 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
             </div>
           </div>
 
+          {/* Bank Method */}
           {method === 'bank' && (
-            <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-bold text-gray-900">Bank Account Details</h3>
+            <Card className="bg-muted/50 border-border p-6 space-y-4">
+              <h3 className="font-bold text-foreground flex items-center gap-2">
+                <Zap className="w-4 h-4 text-primary" />
+                Bank Account Details
+              </h3>
               
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Select Bank</label>
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-foreground">Select Bank</label>
                 <select
                   value={selectedBank}
                   onChange={(e) => setSelectedBank(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+                  className="w-full px-4 py-2 h-10 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">
                     {banks.length === 0 ? 'Loading banks...' : 'Choose a bank...'}
@@ -269,65 +293,93 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Account Number</label>
-                <input
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-foreground">Account Number</label>
+                <Input
                   type="text"
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value.slice(0, 10))}
                   placeholder="1234567890"
                   maxLength={10}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+                  className="h-10 border-border bg-background focus:ring-primary"
                 />
-                {verifying && <p className="text-xs text-blue-600 mt-2">Verifying...</p>}
+                {verifying && (
+                  <p className="text-xs text-primary font-bold flex items-center gap-1 mt-2">
+                    <Zap className="w-3 h-3" /> Verifying...
+                  </p>
+                )}
                 {accountName && (
-                  <p className="text-xs text-green-600 mt-2">✓ {accountName}</p>
+                  <p className="text-xs text-success font-bold flex items-center gap-1 mt-2">
+                    <CheckCircle2 className="w-3 h-3" /> {accountName}
+                  </p>
                 )}
               </div>
-            </div>
+            </Card>
           )}
 
+          {/* Mobile Money Method */}
           {method === 'momo' && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-bold text-gray-900 mb-4">Mobile Money Details</h3>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="0541234567"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
-              />
+            <Card className="bg-muted/50 border-border p-6 space-y-4">
+              <h3 className="font-bold text-foreground flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-primary" />
+                Mobile Money Details
+              </h3>
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-foreground">Phone Number</label>
+                <Input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="0541234567"
+                  className="h-10 border-border bg-background focus:ring-primary"
+                />
+              </div>
               {amount && parseFloat(amount) < 50 && (
-                <p className="text-xs text-orange-600 mt-2">
-                  ⚠️ GHS 5 processing fee applies for amounts below GHS 50
-                </p>
+                <div className="flex items-start gap-2 p-3 bg-orange-500/10 border border-orange-500/20 rounded">
+                  <AlertCircle className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-orange-700 font-bold">
+                    GHS 5 processing fee applies for amounts below GHS 50
+                  </p>
+                </div>
               )}
-            </div>
+            </Card>
           )}
 
+          {/* Submit Button */}
           <Button
             type="submit"
-            className="w-full text-lg py-6"
+            className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-bold"
             disabled={loading || (method === 'bank' && !accountName)}
           >
             {loading ? 'Processing...' : 'Withdraw Now'}
           </Button>
         </form>
 
-        <div className="mt-8 bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
-          <p className="text-sm text-gray-700">
-            <strong>Processing:</strong> Bank transfers are next working day. Mobile money is faster.
-          </p>
+        {/* Info Box */}
+        <div className="mt-8 bg-primary/10 border border-primary/20 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-foreground">Processing Time</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Bank transfers: 1-2 working days • Mobile money: Instant
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
+      </Card>
 
-      <div className="mt-8 flex gap-4">
-        <Link href="/dashboard/earner/tasks">
-          <Button variant="outline">Browse More Tasks</Button>
+      {/* Action Links */}
+      <div className="mt-8 flex flex-col sm:flex-row gap-4">
+        <Link href="/dashboard/earner/tasks" className="flex-1 sm:flex-none">
+          <Button variant="outline" className="w-full">
+            Browse More Tasks
+          </Button>
         </Link>
-        <Link href="/dashboard/earner/earnings">
-          <Button variant="outline">View Earnings</Button>
+        <Link href="/dashboard/earner/earnings" className="flex-1 sm:flex-none">
+          <Button variant="outline" className="w-full">
+            View Earnings
+          </Button>
         </Link>
       </div>
     </>

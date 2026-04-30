@@ -2,7 +2,7 @@ import {  getLoggedInUserAction } from '@/lib/auth';
 import { fetchUserData } from '@/lib/actions/user';
 import AppSidebar from '@/components/app-sidebar';
 import { EARNER_MENU_ITEMS } from '@/constants/navigation';
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 
 export default async function EarnerLayout({ children }: { children: React.ReactNode }) {
   const currentUser = await getLoggedInUserAction();
@@ -24,6 +24,7 @@ export default async function EarnerLayout({ children }: { children: React.React
       <SidebarInset>
         <main className="flex-1">
           {/* Pass userData to children via context or props */}
+          <SidebarTrigger />
           {children}
         </main>
       </SidebarInset>

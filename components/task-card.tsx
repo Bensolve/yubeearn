@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { formatAmount } from '@/lib/utils';
 import { completeTaskAction } from '@/lib/actions/tasks';
 import Image from 'next/image';
 import type { Task } from '@/types';
+import { Play, CheckCircle2, Users, Clock, Zap } from 'lucide-react';
 
 interface TaskCardProps {
   task: Task;
@@ -52,82 +55,121 @@ export default function TaskCard({ task, isCompleted, userId }: TaskCardProps) {
   };
 
   return (
-    <div
-      className={`rounded-lg shadow overflow-hidden ${
-        watched ? 'bg-gray-100' : 'bg-white hover:shadow-lg transition'
-      }`}
-    >
+    <Card className={`overflow-hidden border-border transition ${
+      watched ? 'bg-muted/50 opacity-75' : 'bg-card hover:shadow-lg hover:border-primary/50'
+    }`}>
       {/* YouTube Thumbnail Preview */}
-      <div className="relative w-full h-48 bg-gray-300">
+      <div className="relative w-full h-48 bg-muted">
         <Image
           src={thumbnailUrl}
           alt={task.title}
           fill
           className="object-cover"
+          priority
         />
         {!watched && (
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center hover:bg-black/40 transition">
+          <div className="absolute inset-0 bg-black/20 hover:bg-black/30 transition flex items-center justify-center group">
             <button
               onClick={handleWatchOnYouTube}
-              className="bg-red-600 hover:bg-red-700 text-white rounded-full p-4 transition"
+              className="bg-primary hover:bg-primary/90 text-white rounded-full p-4 transition transform group-hover:scale-110 shadow-lg"
+              aria-label="Play video"
             >
-              ▶️ Play Preview
+              <Play className="w-6 h-6 fill-white" />
             </button>
           </div>
         )}
         {watched && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <span className="bg-green-600 text-white px-4 py-2 rounded-full font-bold">
-              ✓ Completed
-            </span>
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <Badge className="bg-success text-white text-sm">
+              <CheckCircle2 className="w-4 h-4 mr-1" />
+              Completed
+            </Badge>
           </div>
         )}
       </div>
 
       {/* Card Content */}
-      <div className="p-6">
-        <div className="mb-4">
-          <h3 className="text-xl font-bold text-gray-900">{task.title}</h3>
-          <p className="text-gray-600 text-sm">{task.description}</p>
+      <div className="p-6 space-y-4">
+        {/* Task Title & Description */}
+        <div>
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h3 className="text-lg font-bold text-foreground">{task.title}</h3>
+            {watched && (
+              <Badge className="bg-success/20 text-success border-success/30 shrink-0">
+                Done
+              </Badge>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground">{task.description}</p>
         </div>
 
-        <div className="mb-6 space-y-2 text-sm text-gray-600">
-          <p>⏱️ Duration: {task.duration} minutes</p>
-          <p>👥 {task.completions} people completed</p>
+        {/* Task Meta Info */}
+        <div className="grid grid-cols-2 gap-3 py-3 border-y border-border">
+          <div className="flex items-center gap-2 text-sm">
+            <Clock className="w-4 h-4 text-muted-foreground" />
+            <span className="text-muted-foreground">{task.duration} min</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Users className="w-4 h-4 text-muted-foreground" />
+            <span className="text-muted-foreground">{task.completions} completed</span>
+          </div>
         </div>
 
-        <div className="bg-green-50 rounded p-3 mb-6 border-l-4 border-green-600">
-          <p className="text-gray-600 text-sm mb-1">You'll earn</p>
-          <p className="text-2xl font-bold text-green-600">GHS {formatAmount(task.reward)}</p>
+        {/* Reward Box */}
+        <div className="bg-success/10 border border-success/20 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground font-bold mb-1">You&lsquo;ll earn</p>
+              <p className="text-2xl font-bold text-success">
+                GHS {formatAmount(task.reward)}
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-success/10 rounded-lg flex items-center justify-center">
+              <Zap className="w-5 h-5 text-success" />
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-3">
+        {/* Action Buttons */}
+        <div className="space-y-2 pt-2">
           {!watched ? (
             <>
               <Button
-                className="w-full bg-red-600 hover:bg-red-700"
+                className="w-full h-10 bg-primary hover:bg-primary/90 text-white font-bold"
                 onClick={handleWatchOnYouTube}
               >
-                🎥 Watch Full Video
+                <Play className="w-4 h-4 mr-2 fill-white" />
+                Watch on YouTube
               </Button>
-              <p className="text-xs text-gray-500 text-center">
-                After watching, come back and claim your reward
-              </p>
               <Button
-                className="w-full"
+                className="w-full h-10 bg-success hover:bg-success/90 text-white font-bold"
                 onClick={handleClaimReward}
                 disabled={loading}
               >
-                {loading ? 'Claiming...' : '✓ Claim Reward'}
+                {loading ? (
+                  <>
+                    <span className="inline-block animate-spin mr-2">⚙️</span>
+                    Claiming...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Claim Reward
+                  </>
+                )}
               </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                Watch the video first, then claim your reward
+              </p>
             </>
           ) : (
-            <Button disabled className="w-full">
-              ✓ Already Completed
+            <Button disabled className="w-full h-10 bg-muted text-muted-foreground">
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Already Completed
             </Button>
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
