@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YubeEarn
 
-## Getting Started
+A platform connecting YouTube creators with Ghanaian earners. Creators pay ₵100 for real viewers, earners watch videos and earn ₵85, platform earns ₵15 commission.
 
-First, run the development server:
+![YubeEarn Screenshot](public/Screenshot%20(968).png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Features
+
+* **Real Viewers**: Creators get verified YouTube watch hours (not bot views)
+* **Easy Earning**: Earners watch videos and claim rewards instantly
+* **Fast Withdrawals**: Bank transfers or mobile money (1-2 days)
+* **Fraud Prevention**: Multi-layer detection with IP monitoring
+* **Mobile-First**: Optimized for 90% mobile users in Ghana
+* **Secure Payments**: Paystack integration for all transactions
+
+## 💸 Business Model
+
+```
+Creator pays ₵100 → Earner gets ₵85 → Platform gets ₵15
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Creators: Get 4,000 watch hours in 2-3 months
+- Earners: Make ₵17 per minute (₵85 per 5-min video)
+- Platform: Sustainable ₵15 commission per transaction
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠 Technologies Used
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* **Frontend:**
+  * Next.js 16
+  * TypeScript
+  * Tailwind CSS + Shadcn/UI
+  * React Server Components
 
-## Learn More
+* **Backend:**
+  * Firebase Authentication
+  * Firebase Firestore (NoSQL)
+  * Server Actions
+  * Paystack API
 
-To learn more about Next.js, take a look at the following resources:
+* **Deployment:**
+  * Vercel
+  * Firebase
+  * GitHub
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚀 Getting Started
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Prerequisites
+```bash
+Node.js 18+
+pnpm
+Firebase project
+Paystack account
+```
 
-## Deploy on Vercel
+### Installation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Clone repository:
+```bash
+git clone https://github.com/Bensolve/yubeearn.git
+cd yubeearn
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2. Install dependencies:
+```bash
+pnpm install
+```
+
+3. Set up `.env.local`:
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+PAYSTACK_SECRET_KEY=...
+NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=...
+```
+
+4. Run development server:
+```bash
+pnpm dev
+```
+
+5. Open `http://localhost:3000`
+
+### Test Credentials
+```
+Email: test@firebase.com
+Password: password123
+```
+
+
+
+
+## 🚀 Deployment
+
+Deploy to Vercel:
+
+1. Push to GitHub
+2. Connect repo to Vercel
+3. Add environment variables
+4. Deploy!
+
+## 🤝 Contributing
+
+1. Fork repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit: `git commit -m 'feat: Add feature'`
+4. Push: `git push origin feature/amazing-feature`
+5. Open Pull Request
+
+### Code Standards
+- TypeScript (no `any` types)
+- Shadcn/UI components
+- Mobile-first Tailwind
+- Proper error handling
+
+## 📄 License
+
+MIT License - see LICENSE file
+
+## 🙏 Acknowledgments
+
+- Firebase for auth & database
+- Paystack for payments
+- Shadcn/UI for components
+- Next.js & Tailwind CSS
+
+---
+
+**Built with ❤️ for creators and earners in Ghana**
+
+⭐ Star this repo if you find it helpful!
