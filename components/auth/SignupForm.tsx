@@ -3,12 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { validateSignupInputs } from "@/lib/validation";
 import { signUpAction } from "@/lib/auth";
 import type { UserRole } from "@/types";
+import { AlertCircle, CheckCircle2, Eye, EyeOff, Mail, Lock, Zap } from "lucide-react";
 
 interface SignupFormProps {
   role: UserRole;
@@ -21,6 +23,8 @@ export default function SignupForm({ role }: SignupFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +42,7 @@ export default function SignupForm({ role }: SignupFormProps) {
 
     setLoading(true);
     try {
-      await signUpAction(email, password, role); // ← no const user
+      await signUpAction(email, password, role);
       console.log(`[Signup] ${role} created:`, email);
 
       router.push(
@@ -57,11 +61,17 @@ export default function SignupForm({ role }: SignupFormProps) {
     }
   };
 
+  // Role-based colors
+  const roleColor = role === "creator" ? "primary" : "success";
+  const roleBgColor = role === "creator" ? "bg-primary" : "bg-success";
+  const roleTextColor = role === "creator" ? "text-primary" : "text-success";
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6 py-12">
-      <Card className="w-full max-w-md  bg-card border-border p-8 md:p-10">
+      <Card className="w-full max-w-md bg-card border-border p-8 md:p-10">
         {/* Header */}
         <div className="text-center mb-8">
+          {/* Logo */}
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">Y</span>
@@ -69,24 +79,27 @@ export default function SignupForm({ role }: SignupFormProps) {
             <h1 className="text-3xl font-bold text-primary">YubeEarn</h1>
           </div>
 
-          <p className="text-muted-foreground">
-            Sign up as{" "}
-            <span
-              className={
-                role === "creator" ? "text-blue-600" : "text-green-600"
-              }
-            >
-              {role}
-            </span>{" "}
-            to continue
+          {/* Role Badge */}
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <p className="text-muted-foreground">Sign up as</p>
+            <Badge className={`${roleBgColor} text-white capitalize`}>
+              {role === "creator" ? "🎬 Creator" : "💰 Earner"}
+            </Badge>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            {role === "creator"
+              ? "Create campaigns to reach 4,000 watch hours"
+              : "Watch videos and earn real money"}
           </p>
         </div>
 
-        {/* form */}
+        {/* Form */}
         <form className="space-y-5" onSubmit={handleSubmit}>
-          {/* Email field */}
+          {/* Email Field */}
           <div className="space-y-2">
-            <label className="block text-sm font-bold text-foreground">
+            <label className="block text-sm font-bold text-foreground flex items-center gap-2">
+              <Mail className="w-4 h-4 text-muted-foreground" />
               Email Address
             </label>
             <Input
@@ -95,65 +108,125 @@ export default function SignupForm({ role }: SignupFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               className="h-10 border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-primary"
+              disabled={loading}
             />
           </div>
 
           {/* Password Field */}
-
           <div className="space-y-2">
-            <label className="block text-sm font-bold text-foreground">
+            <label className="block text-sm font-bold text-foreground flex items-center gap-2">
+              <Lock className="w-4 h-4 text-muted-foreground" />
               Password
             </label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="h-10 border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-primary"
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-10 border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-primary pr-10"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+                disabled={loading}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
 
+          {/* Confirm Password Field */}
           <div className="space-y-2">
-            <label className="block text-sm font-bold text-foreground">
-              {" "}
+            <label className="block text-sm font-bold text-foreground flex items-center gap-2">
+              <Lock className="w-4 h-4 text-muted-foreground" />
               Confirm Password
             </label>
-            <Input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-              className="h-10 border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-primary"
-            />
+            <div className="relative">
+              <Input
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-10 border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-primary pr-10"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+                disabled={loading}
+              >
+                {showConfirm ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+            {password && confirmPassword && password === confirmPassword && (
+              <p className="text-xs text-success font-bold flex items-center gap-1 mt-1">
+                <CheckCircle2 className="w-3 h-3" />
+                Passwords match
+              </p>
+            )}
           </div>
 
-          {/* Error Message */}
+          {/* Error Message - WARNING COLOR (Red) */}
           {error && (
-            <div className="bg-red-100 border-l-4 border-red-600 text-red-800 p-4 rounded">
-              <p className="font-bold text-sm">Error</p>
-              <p className="text-sm">{error}</p>
+            <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-600 text-red-800 dark:text-red-200 p-4 rounded">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm">Error</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              </div>
             </div>
           )}
 
+          {/* Submit Button - PRIMARY COLOR */}
           <Button
             type="submit"
-            className="w-full h-11 text-base bg-primary hover:bg-primary/90 text-white font-bold"
+            className="w-full h-11 text-base bg-primary hover:bg-primary/90 text-white font-bold transition"
             disabled={loading}
           >
-            {loading ? "Creating Account..." : "Create Account"}
+            {loading ? (
+              <>
+                <span className="inline-block animate-spin mr-2">⚙️</span>
+                Creating Account...
+              </>
+            ) : (
+              <>
+                <Zap className="w-4 h-4 mr-2 fill-white" />
+                Create Account
+              </>
+            )}
           </Button>
         </form>
 
+        {/* Footer Links */}
         <div className="mt-8 space-y-3 text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link
               href="/login"
-              className="text-primary font-bold hover:underline"
+              className="text-primary font-bold hover:underline transition"
             >
-              Login
+              Login here
             </Link>
           </p>
+          <div className="pt-3 border-t border-border">
+            <p className="text-xs text-muted-foreground">
+              By signing up, you agree to our Terms of Service
+            </p>
+          </div>
         </div>
       </Card>
     </div>

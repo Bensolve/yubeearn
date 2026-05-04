@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { User } from '@/types';
+import { LogOut, Shield } from 'lucide-react';
 
 interface MenuItem {
   label: string;
@@ -43,10 +44,11 @@ export default function AppSidebar({ menuItems, user }: AppSidebarProps) {
 
   return (
     <Sidebar className="bg-background border-r border-border">
-      {/* Header */}
+      {/* Header - PRIMARY (Red - Brand) */}
       <SidebarHeader className="p-6 border-b border-border">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center group-hover:bg-primary/90 transition">
+          {/* Logo - PRIMARY */}
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center group-hover:bg-primary/90 transition shrink-0">
             <span className="text-white font-bold text-sm">Y</span>
           </div>
           <span className="text-xl font-bold text-primary group-hover:text-primary/90 transition">
@@ -84,22 +86,33 @@ export default function AppSidebar({ menuItems, user }: AppSidebarProps) {
 
       {/* Footer */}
       <SidebarFooter className="p-4 space-y-4 border-t border-border">
-        {/* User Card */}
-        <Card className="bg-muted border-border p-4">
-          <p className="text-xs text-muted-foreground mb-2 font-bold">Logged in as</p>
+        {/* User Card - PRIMARY (Red - info) */}
+        <Card className="bg-primary/5 border-primary/20 p-4 hover:border-primary/50 transition">
+          <div className="flex items-start gap-2 mb-2">
+            <Shield className="w-3 h-3 text-primary shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground font-bold">Logged in as</p>
+          </div>
           <p className="text-sm font-bold text-foreground truncate">
             {user?.email || 'Not logged in'}
           </p>
           <p className="text-xs text-muted-foreground mt-2 capitalize">
-            Role: <Badge variant="outline" className="ml-1">{user?.role}</Badge>
+            Role: 
+            {/* PRIMARY: Role badge (red) */}
+            <Badge 
+              variant="outline" 
+              className="ml-1 bg-primary/10 text-primary border-primary/30 shrink-0"
+            >
+              {user?.role === 'creator' ? '🎬 Creator' : user?.role === 'earner' ? '💰 Earner' : '⚙️ Admin'}
+            </Badge>
           </p>
         </Card>
 
-        {/* Logout Button */}
+        {/* Logout Button - PRIMARY (Red - action) */}
         <Button
-          className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-10"
+          className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-10 transition"
           onClick={handleLogout}
         >
+          <LogOut className="w-4 h-4 mr-2" />
           Logout
         </Button>
       </SidebarFooter>

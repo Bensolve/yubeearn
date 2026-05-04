@@ -10,7 +10,7 @@ import { formatAmount } from '@/lib/utils';
 import { initiateWithdrawalAction } from '@/lib/actions/withdraw';
 import { getGhanaBanksAction, verifyAccountNumberAction } from '@/lib/actions/paystack';
 import type { User } from '@/types';
-import { AlertCircle, CheckCircle2, Zap, Smartphone } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Zap, Smartphone, ArrowRight, Wallet } from 'lucide-react';
 
 interface Bank {
   id: number;
@@ -173,20 +173,20 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
 
   return (
     <>
-      {/* Message Alert */}
+      {/* Message Alert - SUCCESS (Green) or WARNING (Red) */}
       {message && (
         <Card
           className={`mb-6 p-4 border-l-4 ${
             message.type === 'success'
               ? 'bg-success/10 border-success text-success'
-              : 'bg-red-100 border-red-600 text-red-800'
+              : 'bg-red-100 dark:bg-red-900/30 border-red-600 text-red-800 dark:text-red-200'
           }`}
         >
           <div className="flex items-start gap-3">
             {message.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
             ) : (
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
             )}
             <p className="font-bold text-sm">{message.text}</p>
           </div>
@@ -198,7 +198,8 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
         <form className="space-y-6" onSubmit={handleWithdraw}>
           {/* Amount Input */}
           <div className="space-y-2">
-            <label className="block text-sm font-bold text-foreground">
+            <label className="block text-sm font-bold text-foreground flex items-center gap-2">
+              <Wallet className="w-4 h-4 text-muted-foreground" />
               Amount to Withdraw (GHS)
             </label>
             <Input
@@ -210,12 +211,13 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
               max="50000"
               step="0.01"
               className="h-10 border-border bg-background focus:ring-primary"
+              disabled={loading}
             />
             <p className="text-xs text-muted-foreground">Min: GHS 10 | Max: GHS 50,000</p>
             
-            {/* Amount Preview */}
+            {/* Amount Preview - SUCCESS (Green) */}
             {amount && (
-              <Card className="bg-muted border-border p-4 mt-3">
+              <Card className="bg-success/10 border-success/20 p-4 mt-3">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-muted-foreground">You requested:</p>
@@ -223,11 +225,11 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
                   </div>
                   {fee > 0 && (
                     <>
-                      <div className="flex justify-between items-center pt-2 border-t border-border">
+                      <div className="flex justify-between items-center pt-2 border-t border-success/20">
                         <p className="text-sm text-muted-foreground">Processing fee:</p>
                         <p className="font-bold text-orange-600">-GHS {fee}</p>
                       </div>
-                      <div className="flex justify-between items-center pt-2 border-t border-border">
+                      <div className="flex justify-between items-center pt-2 border-t border-success/20">
                         <p className="text-sm font-bold text-foreground">You&apos;ll receive:</p>
                         <p className="font-bold text-success">GHS {formatAmount(netAmount)}</p>
                       </div>
@@ -238,7 +240,7 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
             )}
           </div>
 
-          {/* Method Selection */}
+          {/* Method Selection - PRIMARY (Red) */}
           <div className="space-y-3">
             <label className="block text-sm font-bold text-foreground">Withdrawal Method</label>
             <div className="grid grid-cols-2 gap-4">
@@ -250,6 +252,7 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
                     ? 'border-primary bg-primary/5 text-primary'
                     : 'border-border text-muted-foreground hover:border-primary/50'
                 }`}
+                disabled={loading}
               >
                 🏦 Bank Account
               </button>
@@ -261,6 +264,7 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
                     ? 'border-primary bg-primary/5 text-primary'
                     : 'border-border text-muted-foreground hover:border-primary/50'
                 }`}
+                disabled={loading}
               >
                 📱 Mobile Money
               </button>
@@ -280,7 +284,8 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
                 <select
                   value={selectedBank}
                   onChange={(e) => setSelectedBank(e.target.value)}
-                  className="w-full px-4 py-2 h-10 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-4 py-2 h-10 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+                  disabled={loading}
                 >
                   <option value="">
                     {banks.length === 0 ? 'Loading banks...' : 'Choose a bank...'}
@@ -302,15 +307,16 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
                   placeholder="1234567890"
                   maxLength={10}
                   className="h-10 border-border bg-background focus:ring-primary"
+                  disabled={loading}
                 />
                 {verifying && (
                   <p className="text-xs text-primary font-bold flex items-center gap-1 mt-2">
-                    <Zap className="w-3 h-3" /> Verifying...
+                    <Zap className="w-3 h-3 animate-spin" /> Verifying...
                   </p>
                 )}
                 {accountName && (
                   <p className="text-xs text-success font-bold flex items-center gap-1 mt-2">
-                    <CheckCircle2 className="w-3 h-3" /> {accountName}
+                    <CheckCircle2 className="w-3 h-3 shrink-0" /> {accountName}
                   </p>
                 )}
               </div>
@@ -332,12 +338,13 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   placeholder="0541234567"
                   className="h-10 border-border bg-background focus:ring-primary"
+                  disabled={loading}
                 />
               </div>
               {amount && parseFloat(amount) < 50 && (
                 <div className="flex items-start gap-2 p-3 bg-orange-500/10 border border-orange-500/20 rounded">
-                  <AlertCircle className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-orange-700 font-bold">
+                  <AlertCircle className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-orange-700 dark:text-orange-300 font-bold">
                     GHS 5 processing fee applies for amounts below GHS 50
                   </p>
                 </div>
@@ -345,20 +352,31 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
             </Card>
           )}
 
-          {/* Submit Button */}
+          {/* Submit Button - PRIMARY (Red) */}
           <Button
             type="submit"
-            className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-bold"
+            className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-bold transition"
             disabled={loading || (method === 'bank' && !accountName)}
           >
-            {loading ? 'Processing...' : 'Withdraw Now'}
+            {loading ? (
+              <>
+                <span className="inline-block animate-spin mr-2">⚙️</span>
+                Processing...
+              </>
+            ) : (
+              <>
+                <Wallet className="w-4 h-4 mr-2" />
+                Withdraw Now
+                <ArrowRight className="w-4 h-4 ml-auto" />
+              </>
+            )}
           </Button>
         </form>
 
-        {/* Info Box */}
+        {/* Info Box - PRIMARY (Red) */}
         <div className="mt-8 bg-primary/10 border border-primary/20 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-bold text-foreground">Processing Time</p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -372,13 +390,17 @@ export default function WithdrawForm({ user }: WithdrawFormProps) {
       {/* Action Links */}
       <div className="mt-8 flex flex-col sm:flex-row gap-4">
         <Link href="/dashboard/earner/tasks" className="flex-1 sm:flex-none">
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/5 font-bold">
+            <Zap className="w-4 h-4 mr-2" />
             Browse More Tasks
+            <ArrowRight className="w-4 h-4 ml-auto" />
           </Button>
         </Link>
         <Link href="/dashboard/earner/earnings" className="flex-1 sm:flex-none">
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full border-success text-success hover:bg-success/5 font-bold">
+            <CheckCircle2 className="w-4 h-4 mr-2" />
             View Earnings
+            <ArrowRight className="w-4 h-4 ml-auto" />
           </Button>
         </Link>
       </div>
