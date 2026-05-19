@@ -1,10 +1,10 @@
 import { getLoggedInUserAction } from '@/lib/auth';
+import { getActiveCampaignsAction } from '@/lib/actions/campaigns';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { formatAmount } from '@/lib/utils';
-import { mockTasks } from '@/constants/tasks';
 import { redirect } from 'next/navigation';
 import TaskCard from '@/components/task-card';
 import { Zap, TrendingUp, ArrowRight, CheckCircle } from 'lucide-react';
@@ -17,7 +17,15 @@ export default async function TasksPage() {
   }
 
   const completedTasks = user.completedTasks || [];
-  const availableTasks = mockTasks.filter(task => !completedTasks.includes(task.id));
+
+  // ✅ NOW reads from Firebase (real campaigns creators made)
+  const allCampaigns = await getActiveCampaignsAction();
+
+  // Filter out tasks this user already completed
+  const availableTasks = allCampaigns.filter(
+    (task) => !completedTasks.includes(task.id)
+  );
+
   const totalEarned = completedTasks.length * 85;
 
   return (
@@ -36,16 +44,14 @@ export default async function TasksPage() {
                 <span className="font-bold text-success ml-1">GHS 85</span> per task
               </p>
             </div>
-            {/* SUCCESS: Available count badge */}
             <Badge className="bg-success text-white shrink-0">
               {availableTasks.length} Available
             </Badge>
           </div>
         </div>
 
-        {/* Info Cards - Quick Stats */}
+        {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          {/* Total Available - PRIMARY (Red) */}
           <Card className="bg-primary/10 border-primary/20 p-4 hover:border-primary/50 transition">
             <div className="flex items-center justify-between">
               <div>
@@ -58,7 +64,6 @@ export default async function TasksPage() {
             </div>
           </Card>
 
-          {/* Earnings Per Task - SUCCESS (Green) */}
           <Card className="bg-success/10 border-success/20 p-4 hover:border-success/50 transition">
             <div className="flex items-center justify-between">
               <div>
@@ -75,29 +80,24 @@ export default async function TasksPage() {
         {/* Tasks Grid */}
         {availableTasks.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {availableTasks.map((task) => {
-              const isCompleted = completedTasks.includes(task.id);
-              return (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  isCompleted={isCompleted}
-                  userId={user.id}
-                />
-              );
-            })}
+            {availableTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                isCompleted={completedTasks.includes(task.id)}
+                userId={user.id}
+              />
+            ))}
           </div>
         ) : (
-          /* Empty State - All tasks completed */
           <Card className="bg-gradient-to-r from-success/10 to-primary/10 border-success/20 p-12 text-center">
             <div className="text-5xl mb-4">🎉</div>
             <h3 className="text-2xl font-bold text-foreground mb-2">
-              You&apos;ve completed all available tasks!
+              No tasks available right now
             </h3>
             <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
-              Great work! Check back later for more tasks to earn from
+              Check back later — new campaigns are added by creators daily!
             </p>
-            {/* PRIMARY: Back to dashboard button */}
             <Link href="/dashboard/earner">
               <Button className="bg-primary hover:bg-primary/90 text-white font-bold">
                 <ArrowRight className="w-4 h-4 mr-2" />
@@ -107,7 +107,7 @@ export default async function TasksPage() {
           </Card>
         )}
 
-        {/* Completed Tasks Summary - SUCCESS (Green) */}
+        {/* Completed Tasks Summary */}
         {completedTasks.length > 0 && (
           <div className="mt-8 bg-success/10 border border-success/20 rounded-lg p-6">
             <div className="flex items-center gap-3">
