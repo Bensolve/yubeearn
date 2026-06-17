@@ -5,14 +5,13 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  getAuth,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { cookies } from 'next/headers';
 import type { User, UserRole } from '@/types';
 
 // ============================================
-// SIGNUP (Server Action)
+// SIGNUP
 // ============================================
 export async function signUpAction(
   email: string,
@@ -39,7 +38,6 @@ export async function signUpAction(
       createdAt: newUser.createdAt.toISOString(),
     });
 
-    // Store userId in secure cookie
     const cookieStore = await cookies();
     cookieStore.set('userId', firebaseUser.uid, {
       httpOnly: true,
@@ -55,14 +53,16 @@ export async function signUpAction(
     return {
       success: false,
       error: error.message.includes('email-already-in-use')
-        ? 'Email already exists'
-        : 'Signup failed',
+        ? 'Email already exists. Please login instead.'
+        : error.message.includes('weak-password')
+        ? 'Password must be at least 6 characters.'
+        : 'Signup failed. Please try again.',
     };
   }
 }
 
 // ============================================
-// LOGIN (Server Action)
+// LOGIN
 // ============================================
 export async function loginAction(
   email: string,
@@ -74,7 +74,7 @@ export async function loginAction(
 
     const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
     if (!userDoc.exists()) {
-      return { success: false, error: 'User data not found' };
+      return { success: false, error: 'User data not found. Please sign up.' };
     }
 
     const data = userDoc.data();
@@ -89,7 +89,6 @@ export async function loginAction(
       earningsHistory: data.earningsHistory || [],
     };
 
-    // Store userId in secure cookie
     const cookieStore = await cookies();
     cookieStore.set('userId', firebaseUser.uid, {
       httpOnly: true,
@@ -104,13 +103,19 @@ export async function loginAction(
     console.error('[Auth] Login error:', error.message);
     return {
       success: false,
-      error: 'Invalid email or password',
+      error: error.message.includes('too-many-requests')
+        ? 'Too many attempts. Please wait 5 minutes and try again.'
+        : error.message.includes('invalid-credential')
+        ? 'Wrong email or password. Please check and try again.'
+        : error.message.includes('user-not-found')
+        ? 'No account found. Please sign up first.'
+        : 'Login failed. Please try again.',
     };
   }
 }
 
 // ============================================
-// GET LOGGED IN USER (Server Action)
+// GET LOGGED IN USER
 // ============================================
 export async function getLoggedInUserAction(): Promise<User | null> {
   try {
@@ -140,7 +145,7 @@ export async function getLoggedInUserAction(): Promise<User | null> {
 }
 
 // ============================================
-// LOGOUT (Server Action)
+// LOGOUT
 // ============================================
 export async function logoutAction(): Promise<void> {
   try {

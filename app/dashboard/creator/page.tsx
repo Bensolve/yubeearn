@@ -7,7 +7,9 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { formatAmount } from '@/lib/utils';
 import { TrendingUp, Video, Users, BarChart3, Zap, ArrowRight, Plus } from 'lucide-react';
+// ✅ CORRECT
 import TestBalanceButton from '@/components/test-balance-button';
+import Image from 'next/image';
 
 export default async function CreatorDashboard() {
   const user = await getLoggedInUserAction();
@@ -16,10 +18,8 @@ export default async function CreatorDashboard() {
     redirect('/login');
   }
 
-  // ✅ Fetch REAL campaigns from Firebase
   const campaigns = await getCreatorCampaignsAction(user.id);
 
-  // Calculate real stats from real campaigns
   const totalSpent = campaigns.reduce((sum, c) => sum + c.spent, 0);
   const activeCampaigns = campaigns.filter(c => c.status === 'active').length;
   const totalCompletions = campaigns.reduce((sum, c) => sum + c.completions, 0);
@@ -49,7 +49,6 @@ export default async function CreatorDashboard() {
             </Link>
           </div>
 
-          {/* Test balance button - only shows if balance is 0 */}
           {user.balance === 0 && (
             <div className="mt-4">
               <TestBalanceButton userId={user.id} />
@@ -57,7 +56,7 @@ export default async function CreatorDashboard() {
           )}
         </div>
 
-        {/* Stats - all from real Firebase data */}
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-trust/5 border-trust/20 p-6 hover:border-trust/50 transition">
             <div className="flex items-start justify-between mb-4">
@@ -133,7 +132,7 @@ export default async function CreatorDashboard() {
           </div>
         </Card>
 
-        {/* ✅ Real campaigns from Firebase */}
+        {/* Campaigns with thumbnails */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -146,16 +145,40 @@ export default async function CreatorDashboard() {
           {campaigns.length > 0 ? (
             <div className="space-y-4">
               {campaigns.map((campaign) => (
-                <Card key={campaign.id} className="bg-card border-border p-6 hover:border-trust/50 hover:shadow-lg transition">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-start gap-2 mb-2">
-                        <h3 className="text-lg font-bold text-foreground">{campaign.videoTitle}</h3>
-                        <Badge className={campaign.status === 'active' ? 'bg-earn/20 text-earn shrink-0' : 'bg-muted text-muted-foreground shrink-0'}>
-                          {campaign.status}
+                <Card key={campaign.id} className="bg-card border-border hover:border-trust/50 hover:shadow-lg transition overflow-hidden">
+                  <div className="flex flex-col md:flex-row">
+
+                    {/* ✅ YouTube Thumbnail */}
+                    <div className="relative w-full md:w-56 h-40 shrink-0 bg-muted">
+                      <Image
+                        src={`https://img.youtube.com/vi/${campaign.youtubeId}/maxresdefault.jpg`}
+                        alt={campaign.videoTitle}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 224px"
+                        className="object-cover"
+                      />
+                      <div className="absolute top-2 left-2">
+                        <Badge className={campaign.status === 'active'
+                          ? 'bg-earn text-white'
+                          : 'bg-muted text-muted-foreground'
+                        }>
+                          {campaign.status === 'active' ? '🔴 Live' : campaign.status}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-4 truncate">{campaign.youtubeUrl}</p>
+                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-bold">
+                        {campaign.daysLeft}d left
+                      </div>
+                    </div>
+
+                    {/* Campaign Info */}
+                    <div className="flex-1 p-4">
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <h3 className="text-lg font-bold text-foreground leading-tight">
+                          {campaign.videoTitle}
+                        </h3>
+                        <ArrowRight className="w-5 h-5 text-muted-foreground shrink-0" />
+                      </div>
+
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="p-2 bg-muted/50 rounded">
                           <p className="text-xs text-muted-foreground">Completions</p>
@@ -170,12 +193,11 @@ export default async function CreatorDashboard() {
                           <p className="text-lg font-bold text-trust">{campaign.watchHours.toFixed(1)}h</p>
                         </div>
                         <div className="p-2 bg-muted/50 rounded">
-                          <p className="text-xs text-muted-foreground">Days Left</p>
-                          <p className="text-lg font-bold text-reward">{campaign.daysLeft}</p>
+                          <p className="text-xs text-muted-foreground">Reward/View</p>
+                          <p className="text-lg font-bold text-reward">GHS {campaign.rewardAmount}</p>
                         </div>
                       </div>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-muted-foreground shrink-0 mt-1" />
                   </div>
                 </Card>
               ))}

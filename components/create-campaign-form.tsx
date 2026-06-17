@@ -14,14 +14,12 @@ interface CreateCampaignProps {
   user: User;
 }
 
-// Extract YouTube ID from URL
 function extractYouTubeId(url: string): string | null {
   const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/;
   const match = url.match(regex);
   return match ? match[1] : null;
 }
 
-// Fetch real YouTube title using oEmbed (no API key needed!)
 async function fetchYouTubeTitle(url: string): Promise<string> {
   try {
     const oEmbedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
@@ -45,7 +43,6 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState('');
 
-  // Use actual user balance from Firebase
   const userBalance = user.balance || 0;
   const EARNER_EARNING = Math.round(rewardAmount * 0.85);
   const PLATFORM_CUT = Math.round(rewardAmount * 0.15);
@@ -61,15 +58,13 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
     if (id) {
       setYoutubeId(id);
       setVerifying(true);
-
-      // ✅ Fetch REAL YouTube title (no API key needed)
       const title = await fetchYouTubeTitle(url);
       setVideoTitle(title);
       setVerified(true);
       setVerifying(false);
     } else if (url.length > 10) {
       setYoutubeId('');
-      setError('Please enter a valid YouTube URL (youtube.com/watch?v=... or youtu.be/...)');
+      setError('Please enter a valid YouTube URL');
     }
   };
 
@@ -88,7 +83,7 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
     }
 
     if (rewardAmount > userBalance) {
-      setError(`Insufficient balance. You have GHS ${userBalance} but need GHS ${rewardAmount}. Please top up your account.`);
+      setError(`Insufficient balance. You have GHS ${userBalance} but need GHS ${rewardAmount}.`);
       return;
     }
 
@@ -103,8 +98,7 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
       );
 
       if (result.success) {
-        router.push('/dashboard/creator');
-        router.refresh();
+        window.location.href = '/dashboard/creator';
       } else {
         setError(result.error || 'Failed to create campaign');
       }
@@ -118,7 +112,6 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-2xl mx-auto px-6 py-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 flex items-center gap-2">
             <Play className="w-8 h-8 text-trust" />
@@ -129,7 +122,6 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
           </p>
         </div>
 
-        {/* ⚠️ Low balance warning */}
         {userBalance === 0 && (
           <Card className="bg-caution/10 border-caution/30 p-4 mb-6">
             <div className="flex items-start gap-3">
@@ -137,14 +129,13 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
               <div>
                 <p className="text-sm font-bold text-caution">Your balance is GHS 0</p>
                 <p className="text-xs text-caution/80 mt-1">
-                  You need to top up your account before creating a campaign. Minimum is GHS 10.
+                  Top up your account before creating a campaign.
                 </p>
               </div>
             </div>
           </Card>
         )}
 
-        {/* Error */}
         {error && (
           <Card className="bg-caution/10 border-caution/30 p-4 mb-6">
             <div className="flex items-start gap-3">
@@ -178,7 +169,7 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
                 </p>
               )}
 
-              {/* ✅ Shows REAL YouTube title */}
+              {/* Video title */}
               {verified && videoTitle && (
                 <div className="p-3 bg-earn/10 border border-earn/20 rounded-lg">
                   <div className="flex items-start gap-2">
@@ -190,9 +181,26 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
                   </div>
                 </div>
               )}
+
+              {/* ✅ Thumbnail preview - so creator sees before paying */}
+              {verified && youtubeId && (
+                <div className="rounded-lg overflow-hidden border border-earn/20 mt-2">
+                  <img
+                    src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`}
+                    alt={videoTitle}
+                    className="w-full object-cover"
+                  />
+                  <div className="p-2 bg-earn/10">
+                    <p className="text-xs text-earn font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      This is how your video appears to earners
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Reward Amount — only show after URL verified */}
+            {/* Reward Amount */}
             {verified && (
               <div className="space-y-2">
                 <label className="block text-sm font-bold text-foreground flex items-center gap-2">
@@ -211,7 +219,6 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
                 />
                 <p className="text-xs text-muted-foreground">Min: GHS 10 | Max: GHS 500</p>
 
-                {/* Money Breakdown */}
                 <Card className="bg-trust/10 border-trust/20 p-4 mt-2">
                   <p className="text-xs font-bold text-muted-foreground mb-3">Per view breakdown:</p>
                   <div className="space-y-2 text-sm">
@@ -230,7 +237,6 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
                   </div>
                 </Card>
 
-                {/* Not enough balance */}
                 {rewardAmount > userBalance && (
                   <div className="flex items-start gap-2 p-3 bg-caution/10 border border-caution/30 rounded">
                     <AlertTriangle className="w-4 h-4 text-caution shrink-0 mt-0.5" />
@@ -242,7 +248,6 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
               </div>
             )}
 
-            {/* Submit */}
             {verified && (
               <Button
                 type="submit"
@@ -259,21 +264,16 @@ export default function CreateCampaignForm({ user }: CreateCampaignProps) {
           </form>
         </Card>
 
-        {/* Balance Card */}
+        {/* Balance */}
         <Card className="bg-card border-border p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground font-bold">Your Balance</p>
               <p className="text-xl font-bold text-trust">GHS {userBalance}</p>
             </div>
-            <div className="text-right">
-              <Badge className={userBalance > 0 ? 'bg-earn/20 text-earn' : 'bg-caution/20 text-caution'}>
-                {userBalance > 0 ? 'Ready' : 'Top Up Needed'}
-              </Badge>
-              {userBalance === 0 && (
-                <p className="text-xs text-muted-foreground mt-1">Contact support to top up</p>
-              )}
-            </div>
+            <Badge className={userBalance > 0 ? 'bg-earn/20 text-earn' : 'bg-caution/20 text-caution'}>
+              {userBalance > 0 ? 'Ready' : 'Top Up Needed'}
+            </Badge>
           </div>
         </Card>
       </div>
